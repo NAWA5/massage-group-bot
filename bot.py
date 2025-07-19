@@ -1,10 +1,15 @@
 import asyncio
+import logging
 import os
 import random
 from datetime import datetime, timedelta
 
 from dotenv import load_dotenv
 from telethon import TelegramClient
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 load_dotenv()
@@ -33,8 +38,26 @@ REPLIES = load_list("replies.txt")
 USERNAMES = load_list("usernames.txt")
 
 
+def validate_lists() -> None:
+    """Ensure message and reply lists are populated and of equal length."""
+    if not MESSAGES or not REPLIES:
+        logger.error("Message or reply list is empty")
+        raise ValueError("messages.txt and replies.txt must not be empty")
+    if len(MESSAGES) != len(REPLIES):
+        logger.error(
+            "MESSAGES (%d) and REPLIES (%d) have different lengths",
+            len(MESSAGES),
+            len(REPLIES),
+        )
+        raise ValueError(
+            "messages.txt and replies.txt must contain the same number of lines"
+        )
+    logger.info("Loaded %d message-reply pairs", len(MESSAGES))
+
+
 async def post_pairs():
     """Send matching question/reply pairs with a delay between them."""
+    validate_lists()
     for i, (question, answer) in enumerate(zip(MESSAGES, REPLIES)):
         if i >= 100:
             break
@@ -45,6 +68,8 @@ async def post_pairs():
         else:
             answer_user = question_user
 
+        logger.info("Posting pair %d: %s / %s", i + 1, question, answer)
+
         await client.send_message(int(GROUP_ID), f"{question_user} {question}")
         # Delay so the reply doesn't immediately follow the question
         await asyncio.sleep(15)
@@ -53,13 +78,17 @@ async def post_pairs():
 
 async def daily_scheduler():
     while True:
+        logger.info("Starting posting cycle")
         await post_pairs()
         now = datetime.now()
         tomorrow = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        logger.info("Sleeping until %s", tomorrow)
         await asyncio.sleep((tomorrow - now).total_seconds())
 
 
 def main():
+    validate_lists()
+    logger.info("Starting bot")
     client.start(bot_token=BOT_TOKEN)
     with client:
         client.loop.run_until_complete(daily_scheduler())
