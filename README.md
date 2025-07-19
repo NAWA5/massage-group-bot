@@ -54,7 +54,7 @@ pip install -r requirements.txt
    python bot.py
    ```
 
-   `messages.txt` and `replies.txt` must also be located in the project root. They must contain the same number of lines so each question has a corresponding reply.
+   `messages.txt` and `replies.txt` must also be located in the project root. The bot verifies these files are not empty and contain the same number of lines before it starts.
 
 ## How it works
 

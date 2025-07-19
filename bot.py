@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 import random
 from datetime import datetime, timedelta
@@ -8,6 +9,9 @@ from telethon import TelegramClient
 
 
 load_dotenv()
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 API_ID = os.getenv("API_ID")
 API_HASH = os.getenv("API_HASH")
@@ -33,6 +37,22 @@ REPLIES = load_list("replies.txt")
 USERNAMES = load_list("usernames.txt")
 
 
+def validate_lists():
+    """Ensure message and reply lists have equal non-zero length."""
+    if not MESSAGES or not REPLIES:
+        logger.error("messages.txt or replies.txt is empty")
+        raise ValueError("messages.txt and replies.txt must not be empty")
+    if len(MESSAGES) != len(REPLIES):
+        logger.error(
+            "messages.txt has %d lines but replies.txt has %d",
+            len(MESSAGES),
+            len(REPLIES),
+        )
+        raise ValueError(
+            "messages.txt and replies.txt must contain the same number of lines"
+        )
+
+
 async def post_pairs():
     """Send matching question/reply pairs with a delay between them."""
     for i, (question, answer) in enumerate(zip(MESSAGES, REPLIES)):
@@ -45,18 +65,24 @@ async def post_pairs():
         else:
             answer_user = question_user
 
+        logger.info("Sending question %d: %s", i, question)
         await client.send_message(int(GROUP_ID), f"{question_user} {question}")
         # Delay so the reply doesn't immediately follow the question
         await asyncio.sleep(15)
+        logger.info("Sending reply %d: %s", i, answer)
         await client.send_message(int(GROUP_ID), f"{answer_user} {answer}")
 
 
 async def daily_scheduler():
+    logger.info("Scheduler starting")
+    validate_lists()
     while True:
         await post_pairs()
         now = datetime.now()
         tomorrow = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-        await asyncio.sleep((tomorrow - now).total_seconds())
+        sleep_time = (tomorrow - now).total_seconds()
+        logger.info("Sleeping %.0f seconds until midnight", sleep_time)
+        await asyncio.sleep(sleep_time)
 
 
 def main():
@@ -67,3 +93,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
