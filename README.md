@@ -81,5 +81,18 @@ Once started, the bot will post pairs of messages in the configured
 group. Each pair is separated by 15 seconds. After all 100 pairs are
 sent the bot idles until the next day and then repeats.
 
+## Running tests
+
+The project includes a small pytest suite located in the `tests/` directory.
+After installing the requirements you can execute the tests with:
+
+```bash
+pytest
+```
+
+This verifies that message files are loaded correctly and that the
+scheduling logic waits 15 seconds between message pairs and stops after 100
+pairs.
+
 ## Author
 Developed by NAWA5

@@ -2,3 +2,4 @@ telethon
 pandas
 openpyxl
 python-dotenv
+pytest-asyncio
