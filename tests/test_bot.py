@@ -30,11 +30,10 @@ async def test_post_pairs_scheduling(monkeypatch, bot_module):
 
     sent = []
 
-    class DummyClient:
-        async def send_message(self, group_id, message):
-            sent.append((group_id, message))
+    async def fake_send_message(group_id, text):
+        sent.append((group_id, text))
 
-    monkeypatch.setattr(bot, 'client', DummyClient())
+    monkeypatch.setattr(bot.client, 'send_message', fake_send_message)
 
     sleeps = []
 
@@ -57,8 +56,9 @@ async def test_post_pairs_scheduling(monkeypatch, bot_module):
     assert len(sent) == 200
     assert sleeps == [15] * 100
     for i in range(0, len(sent), 2):
-        assert sent[i][1].startswith('user1 ')
-        assert sent[i + 1][1].startswith('user2 ')
+        q_idx = i // 2
+        assert sent[i] == (1, f"user1 q{q_idx}")
+        assert sent[i + 1] == (1, f"user2 a{q_idx}")
 
 @pytest.mark.asyncio
 async def test_daily_scheduler_waits_until_midnight(monkeypatch, bot_module):
