@@ -43,11 +43,19 @@ async def test_post_pairs_scheduling(monkeypatch, bot_module):
 
     monkeypatch.setattr(bot.asyncio, 'sleep', fake_sleep)
 
-    monkeypatch.setattr(bot, 'MESSAGES', ['q'])
-    monkeypatch.setattr(bot, 'REPLIES', ['a'])
-    monkeypatch.setattr(bot, 'USERNAMES', ['user'])
+    monkeypatch.setattr(bot, 'MESSAGES', [f"q{i}" for i in range(150)])
+    monkeypatch.setattr(bot, 'REPLIES', [f"a{i}" for i in range(150)])
+    monkeypatch.setattr(bot, 'USERNAMES', ['user1', 'user2'])
+
+    def fake_choice(seq):
+        return seq[0]
+
+    monkeypatch.setattr(bot.random, 'choice', fake_choice)
 
     await bot.post_pairs()
 
     assert len(sent) == 200
     assert sleeps == [15] * 100
+    for i in range(0, len(sent), 2):
+        assert sent[i][1].startswith('user1 ')
+        assert sent[i + 1][1].startswith('user2 ')
