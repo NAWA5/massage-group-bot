@@ -90,3 +90,19 @@ async def test_daily_scheduler_waits_until_midnight(monkeypatch, bot_module):
 
     assert sleeps == [30 * 60]
 
+
+def test_validate_lists_length_mismatch(monkeypatch, bot_module):
+    bot = bot_module
+    monkeypatch.setattr(bot, 'MESSAGES', ['q1', 'q2'])
+    monkeypatch.setattr(bot, 'REPLIES', ['a1'])
+    with pytest.raises(ValueError):
+        bot.validate_lists()
+
+
+def test_validate_lists_empty(monkeypatch, bot_module):
+    bot = bot_module
+    monkeypatch.setattr(bot, 'MESSAGES', [])
+    monkeypatch.setattr(bot, 'REPLIES', [])
+    with pytest.raises(ValueError):
+        bot.validate_lists()
+
