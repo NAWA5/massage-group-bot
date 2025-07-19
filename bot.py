@@ -12,9 +12,12 @@ load_dotenv()
 API_ID = os.getenv("API_ID")
 API_HASH = os.getenv("API_HASH")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+GROUP_ID = os.getenv("GROUP_ID")
 
-if not all([API_ID, API_HASH, BOT_TOKEN]):
-    raise RuntimeError("API_ID, API_HASH, and BOT_TOKEN must be set in the .env file")
+if not all([API_ID, API_HASH, BOT_TOKEN, GROUP_ID]):
+    raise RuntimeError(
+        "API_ID, API_HASH, BOT_TOKEN, and GROUP_ID must be set in the .env file"
+    )
 
 client = TelegramClient('bot', int(API_ID), API_HASH)
 
@@ -37,8 +40,8 @@ async def post_pairs():
         question = random.choice(MESSAGES)
         answer = random.choice(REPLIES)
 
-        await client.send_message(username, question)
-        await client.send_message(username, answer)
+        await client.send_message(int(GROUP_ID), f"{username} {question}")
+        await client.send_message(int(GROUP_ID), f"{username} {answer}")
         await asyncio.sleep(15)
 
 
