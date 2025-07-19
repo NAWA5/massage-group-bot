@@ -9,6 +9,7 @@ def bot_module(monkeypatch):
     monkeypatch.setenv('API_ID', '1')
     monkeypatch.setenv('API_HASH', 'hash')
     monkeypatch.setenv('BOT_TOKEN', 'token')
+    monkeypatch.setenv('GROUP_ID', '1')
     import bot
     return importlib.reload(bot)
 
@@ -30,8 +31,8 @@ async def test_post_pairs_scheduling(monkeypatch, bot_module):
     sent = []
 
     class DummyClient:
-        async def send_message(self, username, message):
-            sent.append((username, message))
+        async def send_message(self, group_id, message):
+            sent.append((group_id, message))
 
     monkeypatch.setattr(bot, 'client', DummyClient())
 
