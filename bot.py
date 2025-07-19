@@ -46,6 +46,7 @@ async def post_pairs():
             answer_user = question_user
 
         await client.send_message(int(GROUP_ID), f"{question_user} {question}")
+        # Delay so the reply doesn't immediately follow the question
         await asyncio.sleep(15)
         await client.send_message(int(GROUP_ID), f"{answer_user} {answer}")
 

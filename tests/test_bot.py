@@ -59,3 +59,34 @@ async def test_post_pairs_scheduling(monkeypatch, bot_module):
     for i in range(0, len(sent), 2):
         assert sent[i][1].startswith('user1 ')
         assert sent[i + 1][1].startswith('user2 ')
+
+@pytest.mark.asyncio
+async def test_daily_scheduler_waits_until_midnight(monkeypatch, bot_module):
+    bot = bot_module
+
+    async def fake_post_pairs():
+        pass
+    monkeypatch.setattr(bot, 'post_pairs', fake_post_pairs)
+
+    original_datetime = bot.datetime
+
+    class FixedDatetime(original_datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return original_datetime(2023, 1, 1, 23, 30)
+
+    monkeypatch.setattr(bot, 'datetime', FixedDatetime)
+
+    sleeps = []
+
+    async def fake_sleep(seconds):
+        sleeps.append(seconds)
+        raise asyncio.CancelledError()
+
+    monkeypatch.setattr(bot.asyncio, 'sleep', fake_sleep)
+
+    with pytest.raises(asyncio.CancelledError):
+        await bot.daily_scheduler()
+
+    assert sleeps == [30 * 60]
+
