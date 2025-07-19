@@ -45,15 +45,16 @@ pip install -r requirements.txt
    | `API_HASH`| Telegram API hash                  |
    | `BOT_TOKEN` | Token of the bot obtained from BotFather |
    | `GROUP_ID` | Numeric ID of the group the bot should post in |
-
+   To find your `GROUP_ID`, invite the bot to the target group, send a test
+   message and then open `https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates`
+   in your browser. The `chat.id` field of the response is the numeric ID.
    Make sure `.env` is in the project root.
-
 4. Run the bot:
    ```bash
    python bot.py
    ```
 
-   `messages.txt` and `replies.txt` must also be located in the project root.
+   `messages.txt` and `replies.txt` must also be located in the project root. They must contain the same number of lines so each question has a corresponding reply.
 
 ## How it works
 
