@@ -34,15 +34,20 @@ USERNAMES = load_list("usernames.txt")
 
 
 async def post_pairs():
-    """Send 100 question/answer pairs with a 15-second delay."""
-    for _ in range(100):
-        username = random.choice(USERNAMES)
-        question = random.choice(MESSAGES)
-        answer = random.choice(REPLIES)
+    """Send matching question/reply pairs with a delay between them."""
+    for i, (question, answer) in enumerate(zip(MESSAGES, REPLIES)):
+        if i >= 100:
+            break
 
-        await client.send_message(int(GROUP_ID), f"{username} {question}")
-        await client.send_message(int(GROUP_ID), f"{username} {answer}")
+        question_user = random.choice(USERNAMES)
+        if len(USERNAMES) > 1:
+            answer_user = random.choice([u for u in USERNAMES if u != question_user])
+        else:
+            answer_user = question_user
+
+        await client.send_message(int(GROUP_ID), f"{question_user} {question}")
         await asyncio.sleep(15)
+        await client.send_message(int(GROUP_ID), f"{answer_user} {answer}")
 
 
 async def daily_scheduler():

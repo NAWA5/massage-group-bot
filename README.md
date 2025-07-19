@@ -60,12 +60,13 @@ pip install -r requirements.txt
 `bot.py` uses Telethon to send messages to the chat specified by
 `GROUP_ID`. During each run it performs the following loop:
 
-1. Randomly select a username from `usernames.txt`.
-2. Send one question from `messages.txt` and one answer from `replies.txt`.
-3. Repeat until 100 pairs have been sent.
-4. Sleep until midnight and start over.
+1. Iterate through pairs from `messages.txt` and `replies.txt`.
+2. Randomly choose a username for the question and, if possible, a different one for the reply.
+3. Send the question, wait 15 seconds and then send the matching reply.
+4. Continue until 100 pairs have been sent or the lists are exhausted.
+5. Sleep until midnight and start over.
 
-The bot therefore sends 100 question/answer pairs every day at roughly
+The bot therefore sends up to 100 question/answer pairs every day at roughly
 the same time.
 
 ## Troubleshooting
@@ -77,9 +78,10 @@ the same time.
 
 ### Expected behaviour
 
-Once started, the bot will post pairs of messages in the configured
-group. Each pair is separated by 15 seconds. After all 100 pairs are
-sent the bot idles until the next day and then repeats.
+Once started, the bot posts each question from `messages.txt` followed by
+its matching reply from `replies.txt`. The bot waits 15 seconds between
+the question and the answer. After at most 100 pairs (or when the lists
+end) it idles until the next day and then repeats.
 
 ## Running tests
 
